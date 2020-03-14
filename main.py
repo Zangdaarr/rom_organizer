@@ -42,6 +42,7 @@ class MainParser:
     def __process_sorting(self):
         for folder in self.folders:
             self.__process_sorting_for_folder(folder)
+            self.__clean(folder)
 
     def __process_genres_for_folder(self, folder):
 
@@ -73,6 +74,14 @@ class MainParser:
 
         finally:
             pass
+
+    @staticmethod
+    def __clean(folder):
+        for root, dirs, names in os.walk(folder):
+            for directory in dirs:
+                to_delete = os.path.join(root, directory)
+                if 0 == len(os.listdir(to_delete)):
+                    os.rmdir(to_delete)
 
     @staticmethod
     def __parse_arguments():
