@@ -49,7 +49,6 @@ class MainParser:
             self.__organize(folder)
             self.__clean(folder)
 
-
     def __organize(self, folder):
         try:
             parser = GameSortingMapGenerator(folder, self.argument_folder_is_single_rom_folder)
