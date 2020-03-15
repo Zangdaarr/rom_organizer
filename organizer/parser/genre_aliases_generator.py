@@ -87,8 +87,7 @@ class GenreAliasesGenerator(object):
     def __process_genre_aliases(self):
 
         for game in self.game_parser.get_all_games():
-            if self.game_parser.is_game_valid(game):
-                self.__add_genre_node(self.game_parser.get_game_genre(game))
+            self.__add_genre_node(self.game_parser.get_game_genre(game))
 
         self.__sort_genre_aliases()
 
@@ -130,8 +129,8 @@ class GenreAliasesGenerator(object):
 
         if self.replacement_list is not None:
             for alias in self.replacement_list:
-                if re.match(".*{0}.*".format(alias), genre):
-                    computed_alias = alias
+                if re.match(".*{0}.*".format(alias.lower()), genre.lower()):
+                    computed_alias = alias.capitalize()
                     break
 
         return computed_alias
