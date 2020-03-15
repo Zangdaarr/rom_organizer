@@ -14,6 +14,7 @@ class GenreAliasesGenerator(object):
 
     def __init__(self, gamelist_path, is_single_folder, replacement_list=None):
 
+        self.force_clean = False
         self.document_root = None
         self.replacement_list = replacement_list
 
@@ -22,16 +23,22 @@ class GenreAliasesGenerator(object):
         else:
             self.document_path = os.path.join(gamelist_path, '..', self.GENRE_ASSOCIATION_FILE)
 
-        if self.document_exists():
-            self.open_document()
-            
         self.game_parser = GameListParser(gamelist_path)
+
+    def set_force_clean(self, value):
+        self.force_clean = value
 
     def create_genre_association_entry(self):
 
-        if self.document_exists():
+        document_exists = self.document_exists()
+
+        if document_exists and not self.force_clean:
             self.open_document()
         else:
+
+            if document_exists:
+                os.remove(self.document_path)
+
             self.create_document()
 
         self.__add_genre_association_node()
