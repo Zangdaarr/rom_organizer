@@ -12,14 +12,15 @@ from organizer.tools.exception_tools import ExceptionPrinter
 class MainParser:
 
     def __init__(self):
+        self.folders = []
         arguments = self.__parse_arguments()
 
-        self.folders = []
+        self.generate_genres = arguments.generate_genres
+        self.force_generation = arguments.force_generation
+        self.aliases_priority_list = [str(item) for item in arguments.aliases_priority_list.split(',')]
 
         self.find_folders(arguments.root_folder)
         self.argument_folder_is_single_rom_folder = 1 == len(self.folders)
-        self.generate_genres = arguments.generate_genres
-        self.aliases_priority_list = [str(item) for item in arguments.aliases_priority_list.split(',')]
 
     def find_folders(self, from_root):
 
@@ -84,11 +85,31 @@ class MainParser:
     @staticmethod
     def __parse_arguments():
         argument_parser = argparse.ArgumentParser(description='Process roms organizer options')
-        argument_parser.add_argument('root_folder', help="Folder in which the parser will start looking for gamelist.xml files")
-        argument_parser.add_argument('--generate_genres', dest='generate_genres', type=bool, default=False, help='If set to true, no sorting will occur, but genre associations will be created')
-        argument_parser.add_argument('--aliases_priority_list', dest='aliases_priority_list', type=str, default="",
+
+        argument_parser.add_argument('root_folder',
+                                     help="Folder in which the parser will start looking for gamelist.xml files"
+                                     )
+
+        argument_parser.add_argument('--generate_genres',
+                                     dest='generate_genres',
+                                     type=bool,
+                                     default=False,
+                                     help='If set to true, no sorting will occur, but genre associations will be created'
+                                     )
+
+        argument_parser.add_argument('--force_generation',
+                                     dest='force_generation',
+                                     type=bool,
+                                     default=False,
+                                     help='If set to true, existing genre aliases will be erased. Ignored if --generate_genres is False.'
+                                     )
+
+        argument_parser.add_argument('--aliases_priority_list',
+                                     dest='aliases_priority_list',
+                                     type=str,
+                                     default="",
                                      help='If filled, genre will be replaced by an alias in the order they appear on this list during genres generation.'
-                                          ' Example: [\'platform\', \'action\']) will transform action-platform into platform and action-strategy into action')
+                                          ' Example: "platform,action" will transform action-platform into platform and action-strategy into action')
 
         return argument_parser.parse_args()
 
