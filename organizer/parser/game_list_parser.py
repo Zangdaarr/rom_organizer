@@ -68,12 +68,12 @@ class GameListParser(object):
 
     def get_game_genre(self, game):
         match_any_slashes_or_space = re.compile(r'(?:\s+|\\+|/+)')
-        match_any_carret = re.compile(r'-+')
+        match_any_caret = re.compile(r'-+')
 
         genre = self.__process_game_child_value(game, self.GENRE_KEY)
 
         genre = re.sub(match_any_slashes_or_space, '-', genre)
-        genre = re.sub(match_any_carret, '-', genre)
+        genre = re.sub(match_any_caret, '-', genre)
 
         return genre if genre is not self.NO_TEXT else self.NO_GENRE
 

@@ -41,6 +41,12 @@ class MainParser(object):
                                      help='If filled, genre will be replaced by an alias in the order they appear on this list during genres generation.'
                                           ' Example: "platform,action" will transform action-platform into platform and action-strategy into action')
 
+        argument_parser.add_argument('--validate',
+                                     dest='validate',
+                                     type=bool,
+                                     default=False,
+                                     help='If true, will override all other options and run a gamelist.xml validation task. If errors are found they will be summarized in a comprehensive way.')
+
         return argument_parser.parse_args()
 
 
@@ -52,6 +58,7 @@ class MainParser(object):
         self.find_folders(arguments.root_folder)
         self.argument_folder_is_single_rom_folder = 1 == len(self.folders)
         self.generate_genres = arguments.generate_genres
+        self.validate = arguments.validate
         self.aliases_priority_list = [str(item) for item in arguments.aliases_priority_list.split(',')]
 
     def find_folders(self, from_root):
@@ -63,7 +70,10 @@ class MainParser(object):
                 self.folders.append(root)
 
     def execute(self):
-        if not self.generate_genres:
+
+        if self.validate:
+            pass
+        elif not self.generate_genres:
             self.__process_sorting()
         else:
             self.__process_genres()
