@@ -10,21 +10,25 @@ class GameSortingMapGenerator(object):
         self.gamelist_path = gamelist_path
         self.game_parser = GameListParser(gamelist_path)
         self.genre_aliases_generator = GenreAliasesGenerator(gamelist_path, is_single_folder)
-        self.game_map = collections.OrderedDict()
+        self.game_list = []
 
     def get_parsed_games(self):
-        if 0 == len(self.game_map.items()):
+        if not self.game_list:
             self.process_game_map()
 
-        return self.game_map
+        return self.game_list
 
     def process_game_map(self):
 
+        print("Processing game map for " + self.gamelist_path)
         for file_name in self.game_parser.get_all_files():
+
             game = self.game_parser.get_game_node_from_game_file(file_name)
 
             if game is not None:
                 self.__process_games_details(game)
+
+        print("Done processing game map for " + self.gamelist_path)
 
     def __process_games_details(self, game):
 
@@ -32,7 +36,7 @@ class GameSortingMapGenerator(object):
                    self.game_parser.PATH_KEY: self.game_parser.get_game_path(game),
                    self.game_parser.ROOT_KEY: self.gamelist_path}
 
-        self.game_map[self.game_parser.get_game_name(game)] = details
+        self.game_list.append(details)
 
     def __compute_game_genre(self, game):
 
