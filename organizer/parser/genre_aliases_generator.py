@@ -8,6 +8,9 @@ from organizer.tools.exception_tools import ExceptionPrinter
 
 
 class GenreAliasesGenerator(object):
+
+    __GENRE_ATTRIB    = "genre"
+
     GENRE_ASSOCIATION_FILE = 'genre_associations.xml'
     GENRE_ASSOCIATION_NODE = "genre_associations"
     GENRE_ALIAS_KEY = "alias"
@@ -58,8 +61,8 @@ class GenreAliasesGenerator(object):
         self.__process_genre_aliases()
         self.write_document()
 
-    def get_game_genre_alias(self, game):
-        genre = self.game_parser.get_game_genre(game)
+    def get_game_genre_alias(self, game_node):
+        genre = game_node.get_genre()
         return self._get_genre_alias_from_genre(genre)
 
     def _get_genre_alias_from_genre(self, genre):
@@ -71,7 +74,7 @@ class GenreAliasesGenerator(object):
         if genre_association_node is not None:
 
             for node in genre_association_node.getchildren():
-                if node.get(self.game_parser.GENRE_KEY) == genre:
+                if node.get(self.__GENRE_ATTRIB) == genre:
                     genre_alias = node.get(self.GENRE_ALIAS_KEY)
                     break
 
@@ -82,8 +85,8 @@ class GenreAliasesGenerator(object):
 
     def __process_genre_aliases(self):
 
-        for game in self.game_parser.get_all_games():
-            self.__add_genre_node(self.game_parser.get_game_genre(game))
+        for game_node in self.game_parser.get_all_games_nodes():
+            self.__add_genre_node(game_node.get_genre())
 
         self.__sort_genre_aliases()
 
@@ -92,7 +95,7 @@ class GenreAliasesGenerator(object):
 
         if genre_association_node is not None:
             all_genres = genre_association_node.getchildren()
-            all_genres.sort(key=lambda x: x.attrib[self.game_parser.GENRE_KEY].lower())
+            all_genres.sort(key=lambda x: x.attrib[self.__GENRE_ATTRIB].lower())
 
             genre_association_node[:] = all_genres
 
@@ -113,8 +116,8 @@ class GenreAliasesGenerator(object):
         genre_association_node = self.__get_game_association_node()
 
         if genre_association_node is not None and not self.__genre_alias_already_exists(genre):
-            genre_node = etree.Element(self.game_parser.GENRE_KEY)
-            genre_node.set(self.game_parser.GENRE_KEY, genre)
+            genre_node = etree.Element(self.__GENRE_ATTRIB)
+            genre_node.set(self.__GENRE_ATTRIB, genre)
             genre_node.set(self.GENRE_ALIAS_KEY, self.__compute_genre_alias(genre))
 
             genre_association_node.append(genre_node)

@@ -37,7 +37,7 @@ class GameOrganizer:
 
     def __update_game_node(self):
         node = self.get_game_node()
-        node.find(GameListParser.PATH_KEY).text = self.__compute_new_game_location()
+        node.set_path(self.__compute_new_game_location())
 
     def __move_game_file(self):
 

@@ -1,6 +1,6 @@
 import os
 
-from organizer.parser.game_list_parser import GameListParser
+from organizer.parser.game_sorting_map_generator import GameSortingMapGenerator
 
 
 class Game:
@@ -11,9 +11,9 @@ class Game:
 
         for game in parsed_games:
             games_list.append(
-                Game(game.get(GameListParser.GENRE_KEY),
-                     game.get(GameListParser.PATH_KEY),
-                     game.get(GameListParser.ROOT_KEY)
+                Game(game.get(GameSortingMapGenerator.GENRE),
+                     game.get(GameSortingMapGenerator.RELATIVE_PATH),
+                     game.get(GameSortingMapGenerator.ROOT)
                      )
             )
 

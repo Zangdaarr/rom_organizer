@@ -1,5 +1,4 @@
 import os
-import re
 
 from lxml import etree
 
@@ -10,23 +9,20 @@ class GameListParser(object):
 
     GAMELIST_FILE = 'gamelist.xml'
 
-    GAME_ID = "id"
-    GAME_KEY = "game"
-    GENRE_KEY = "genre"
+    __GAME_NODE       = "game"
 
-    PATH_KEY = "path"
-    ROOT_KEY = "root"
-    NAME_KEY = "name"
-    NO_TEXT = "Undefined_text"
-    NO_GENRE = "Unclassified"
+    __ROOT_KEY        = "root"
 
     __EXCLUDE_FOLDERS = ['media']
 
     def __init__(self, gamelist_path):
-        self.root = gamelist_path
-        self.gamelist = os.path.join(gamelist_path, self.GAMELIST_FILE)
-        self.parsed_gamelist = None
+        self.root       = gamelist_path
+        self.gamelist   = os.path.join(gamelist_path, self.GAMELIST_FILE)
+
+        self.games_nodes    = []
         self.files_to_parse = []
+
+        self.parsed_gamelist = None
 
     def parse(self):
         parser = etree.XMLParser(remove_blank_text=True)
@@ -36,6 +32,7 @@ class GameListParser(object):
         except Exception as something_happened:
             ExceptionPrinter.print_exception(something_happened)
 
+        self.__process_games_nodes()
         self.validate()
 
     def write_document(self):
@@ -43,8 +40,8 @@ class GameListParser(object):
         self.parsed_gamelist.write(self.gamelist, pretty_print=True)
 
     def validate(self):
-        for game in self.get_all_games():
-            game_path = os.path.join(self.root, self.get_game_path(game))
+        for game in self.get_all_games_nodes():
+            game_path = os.path.join(self.root, game.get_path(game))
 
             if not os.path.isfile(game_path):
                 raise Exception("No game file located at %s", game_path)
@@ -58,44 +55,31 @@ class GameListParser(object):
 
         return self.files_to_parse
 
-    def get_all_games(self):
-        if self.parsed_gamelist is None:
-            self.parse()
+    def get_all_games_nodes(self):
+        if not self.games_nodes:
+            self.__process_games_nodes()
 
-        return self.parsed_gamelist.findall(self.GAME_KEY)
-
-    def get_game_id(self, game):
-        return game.get(self.GAME_ID)
-
-    def get_game_genre(self, game):
-        match_any_slashes_or_space = re.compile(r'(?:\s+|\\+|/+)')
-        match_any_carret = re.compile(r'-+')
-
-        genre = self.__process_game_child_value(game, self.GENRE_KEY)
-
-        genre = re.sub(match_any_slashes_or_space, '-', genre)
-        genre = re.sub(match_any_carret, '-', genre)
-
-        return genre if genre is not self.NO_TEXT else self.NO_GENRE
-
-    def get_game_path(self, game):
-        return self.__process_game_child_value(game, self.PATH_KEY)
-
-    def get_game_name(self, game):
-        return self.__process_game_child_value(game, self.NAME_KEY)
+        return self.games_nodes
 
     def get_game_node_from_game_file(self, name):
 
         game_node = None
 
-        for game in self.get_all_games():
-            path = self.get_game_path(game)
+        for game in self.get_all_games_nodes():
+            path = game.get_path(game)
             _, file_name = os.path.split(path)
 
             if file_name == name:
                 game_node = game
 
         return game_node
+
+    def __process_games_nodes(self):
+        if self.parsed_gamelist is None:
+            self.parse()
+
+        for node in self.parsed_gamelist.findall(self.__GAME_NODE):
+            self.games_nodes.append(node)
 
     def __process_all_files_to_parse(self):
 
@@ -110,10 +94,4 @@ class GameListParser(object):
                 for name in names:
                     self.files_to_parse.append(name)
 
-    def __process_game_child_value(self, game, key):
-        game_child = game.find(key)
 
-        if game_child is None or game_child.text is None:
-            return self.NO_TEXT
-        else:
-            return game_child.text
